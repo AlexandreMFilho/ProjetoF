@@ -3322,13 +3322,13 @@ int main(int argc, char **argv)
 
   	// /home/alexandre/input/uva.txt
 
-    char* filename = "/home/dgti/ProjetoF/dados_teste/fuel.nhdr";
-	isovalue = 19.1;// 19.1 para fuel  0 pros demais
+    char* filename = "/home/dgti/ProjetoF/dados_teste/7-scalar_field.nhdr";
+	isovalue = 0.0;// 19.1 para fuel  0 pros demais
 	//output_mesh_file = "/home/alexandre/eclipse-workspace/Extended_MC_/output/ct-chest-48-5.off";
 
-  	output_mesh_file = "/home/dgti/ProjetoF/output/fuel.off";
+  	output_mesh_file = "/home/dgti/ProjetoF/output/7-scalar_field.off";
 
-  	output_debug_file = "/home/dgti/ProjetoF/output/debug/fuel.txt";
+  	output_debug_file = "/home/dgti/ProjetoF/output/debug/7-scalar_field.txt";
 
     run(filename);
 	//fecha_arquivo(arquivo);
