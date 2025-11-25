@@ -3323,7 +3323,7 @@ int main(int argc, char **argv)
   	// /home/alexandre/input/uva.txt
 
     char* filename = "/home/dgti/ProjetoF/dados_teste/fuel.nhdr";
-	isovalue = 9.0;// para fuel  0 pros demais
+	isovalue = 19.1;// 19.1 para fuel  0 pros demais
 	//output_mesh_file = "/home/alexandre/eclipse-workspace/Extended_MC_/output/ct-chest-48-5.off";
 
   	output_mesh_file = "/home/dgti/ProjetoF/output/fuel.off";
