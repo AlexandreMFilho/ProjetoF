@@ -75,6 +75,7 @@ public:
 	void visualiza_octree_F(Octree*,FILE*);
 	float getcube(int);
 	void throw_dot_on_uncle(Octree*,vector<AddPoints>);
+	int navega_octree(Octree*);
 
 };
 
@@ -224,6 +225,20 @@ Octree::Octree(int x1, int y1, int z1, int x2, int y2, int z2,Octree* pai,float 
 		}
 	}
 }
+
+//Funcao NOVA
+int navega_octree(Octree* oct){  //Da para colocar uma função para ser executada ao navegar
+	//realiza a função
+	if(oct->nivel == oct->nivel_max && oct->sinal == 1){
+		topology(oct);
+	}else{
+		for(int i=0;i<8;i++){
+			navega_octree(oct->children[i]);
+		}
+	}
+}
+
+
 
 
 

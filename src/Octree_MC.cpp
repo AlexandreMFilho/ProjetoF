@@ -3146,50 +3146,10 @@ int run(char* file)
 
 	printf("ExtendedMC33:: Draw triangulation...\n");
 
-	//Octree* oct = new Octree(0,0,0,maior_pot_2(size_x),maior_pot_2(size_y),maior_pot_2(size_z),nullptr,isovalue,0,pot_2(fmax(size_x,fmax(size_y,size_z))),0);
+	// Octree* oct = new Octree(0,0,0,maior_pot_2(size_x),maior_pot_2(size_y),maior_pot_2(size_z),nullptr,isovalue,0,pot_2(fmax(size_x,fmax(size_y,size_z))),0);
 	Octree* oct = new Octree(0,0,0,real_size_x,real_size_y,real_size_z,nullptr,isovalue,0,pot_2(fmax(real_size_x,fmax(real_size_y,real_size_z))-1),0);
+  
 
-	oct->sinaliza_octree(oct);
-	FILE* aux = fopen(output_debug_file,"w");
-	printf("\n x:%d y:%d z:%d real_x:%d real_y:%d real_z:%d niveis:%d\n",size_x,size_y,size_z,real_size_x,real_size_y,real_size_z,pot_2(fmax(real_size_x,fmax(real_size_y,real_size_z))-1));
-	fprintf(aux,"\n x:%d y:%d z:%d real_x:%d real_y:%d real_z:%d niveis:%d\n",size_x,size_y,size_z,real_size_x,real_size_y,real_size_z,pot_2(fmax(real_size_x,fmax(real_size_y,real_size_z))-1));
-
-	contador_global = 0;
-	oct->visualiza_octree_F(oct,aux);
-	fprintf(aux,"\ncontador de nós:%d\n",contador_global);
-
-	//oct->visualiza_octree(oct);
-	//oct->imprime_octree(oct);
-	//oct->imprime_octree_F(oct,aux);
-	printf("AQUI\n\n\n\n\n\n");
-	oct->mesh(oct);
-	oct->merge(oct);
-	//oct->mesh(oct);
-	fprintf(aux,"\n\nApós o merge\n\n");
-
-	contador_global =0;
-	//oct->imprime_octree_F(oct,aux);
-	oct->visualiza_octree_F(oct,aux);
-	fprintf(aux,"\ncontador de nós:%d\n",contador_global);
-
-	//oct->visualiza_octree(oct);
-	/*
-	fprintf(aux,"\n\nGRID:\n\n");
-
-	int indice =0;
-
-	for(int i=0;i<size_x;i++){
-		fprintf(aux,"%d\n",i);
-		for(int j=0;j<size_y;j++){
-			fprintf(aux,"[");
-			for(int k=0;k<size_z;k++){
-				fprintf(aux,"%f ",f_grid_data[indice]);
-				indice++;
-			}
-			fprintf(aux,"]\n");
-		}
-	}fprintf(aux,"------------------------\n");*/
-	free(aux);
 	/*
 	//	*********************************************************
 	//MODIFICAR A FORMA COMO O GRID É PERCORRIDO
@@ -3278,7 +3238,7 @@ int run(char* file)
 
 	}*/
 
-	printf("done!\n");
+	// printf("done!\n");
 
 	printf("ExtendedMC33:: Writing mesh...");
 	delete[]e_group;
@@ -3362,15 +3322,15 @@ int main(int argc, char **argv)
 
   	// /home/alexandre/input/uva.txt
 
-    char* filename = "/home/alexandre/input/dados_teste/dados_randomicos/308-scalar_field.nhdr";
-	isovalue =0.0;// para fuel  0 pros demais
+    char* filename = "/home/dgti/ProjetoF/dados_teste/fuel.nhdr";
+	isovalue = 9.0;// para fuel  0 pros demais
 	//output_mesh_file = "/home/alexandre/eclipse-workspace/Extended_MC_/output/ct-chest-48-5.off";
 
-  	output_mesh_file = "/home/alexandre/output/OUTPUT/308-scalar_field.off";
+  	output_mesh_file = "/home/dgti/ProjetoF/output/fuel.off";
 
-  	output_debug_file = "/home/alexandre/output/DEBUG/308-scalar_field_debug.txt";
+  	output_debug_file = "/home/dgti/ProjetoF/output/debug/fuel.txt";
 
-	run(filename);
+    run(filename);
 	//fecha_arquivo(arquivo);
 	printf("Program ended..\n");
 	return 0;
