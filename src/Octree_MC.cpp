@@ -3146,9 +3146,9 @@ int run(char* file)
 
 	printf("ExtendedMC33:: Draw triangulation...\n");
 
-	// Octree* oct = new Octree(0,0,0,maior_pot_2(size_x),maior_pot_2(size_y),maior_pot_2(size_z),nullptr,isovalue,0,pot_2(fmax(size_x,fmax(size_y,size_z))),0);
+//	 Octree* oct = new Octree(0,0,0,maior_pot_2(size_x),maior_pot_2(size_y),maior_pot_2(size_z),nullptr,isovalue,0,pot_2(fmax(size_x,fmax(size_y,size_z))),0);
 	Octree* oct = new Octree(0,0,0,real_size_x,real_size_y,real_size_z,nullptr,isovalue,0,pot_2(fmax(real_size_x,fmax(real_size_y,real_size_z))-1),0);
-  
+
 
 	/*
 	//	*********************************************************
@@ -3238,6 +3238,9 @@ int run(char* file)
 
 	}*/
 
+	oct->sinaliza_octree(oct);
+	oct->mesh(oct);
+
 	// printf("done!\n");
 
 	printf("ExtendedMC33:: Writing mesh...");
@@ -3251,7 +3254,7 @@ int run(char* file)
 	snap_mesh_index.clear();
 	snap_mesh_cube.clear();
 
-	//read_triangulation();
+//	read_triangulation();
 	teste_read_triangulation(oct);
 
 	write_mesh();
@@ -3322,13 +3325,13 @@ int main(int argc, char **argv)
 
   	// /home/alexandre/input/uva.txt
 
-    char* filename = "/home/dgti/ProjetoF/dados_teste/7-scalar_field.nhdr";
+    char* filename = "/home/dgti/REPOS/ProjetoF/dados_teste/7-scalar_field.nhdr";
 	isovalue = 0.0;// 19.1 para fuel  0 pros demais
 	//output_mesh_file = "/home/alexandre/eclipse-workspace/Extended_MC_/output/ct-chest-48-5.off";
 
-  	output_mesh_file = "/home/dgti/ProjetoF/output/7-scalar_field.off";
+  	output_mesh_file = "/home/dgti/REPOS/ProjetoF/output/7-scalar_field.off";
 
-  	output_debug_file = "/home/dgti/ProjetoF/output/debug/7-scalar_field.txt";
+//  	output_debug_file = "/home/dgti/REPOS/ProjetoF/output/debug/7-scalar_field.txt";
 
     run(filename);
 	//fecha_arquivo(arquivo);
