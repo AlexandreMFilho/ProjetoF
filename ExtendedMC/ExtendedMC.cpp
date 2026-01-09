@@ -2819,9 +2819,9 @@ int main(int argc, char **argv)
 	output_mesh_file = argv[4];*/
 
 
-    char* filename    = "/home/lis/eclipse-workspace/Extended_MC/input/CT-Chest.nhdr";
+    char* filename    = "/home/note_msi/ProjetoF/dados_teste/7-scalar_field.nhdr";
 	isovalue = 48.5;
-	output_mesh_file = "/home/lis/eclipse-workspace/Extended_MC/output/ct-chest-48-5.off";
+	output_mesh_file = "/home/note_msi/ProjetoF/output/7-scalar_field_model.off";
 
 
 

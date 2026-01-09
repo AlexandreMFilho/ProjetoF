@@ -3325,11 +3325,11 @@ int main(int argc, char **argv)
 
   	// /home/alexandre/input/uva.txt
 
-    char* filename = "/home/dgti/REPOS/ProjetoF/dados_teste/7-scalar_field.nhdr";
+    char* filename = "/home/note_msi/ProjetoF/dados_teste/7-scalar_field.nhdr";
 	isovalue = 0.0;// 19.1 para fuel  0 pros demais
 	//output_mesh_file = "/home/alexandre/eclipse-workspace/Extended_MC_/output/ct-chest-48-5.off";
 
-  	output_mesh_file = "/home/dgti/REPOS/ProjetoF/output/7-scalar_field.off";
+  	output_mesh_file = "/home/note_msi/ProjetoF/output/7-scalar_field_novo.off";
 
 //  	output_debug_file = "/home/dgti/REPOS/ProjetoF/output/debug/7-scalar_field.txt";
 
@@ -3340,6 +3340,10 @@ int main(int argc, char **argv)
 
 }
 
-
+//ALEXANDRE TOPOLOGY != SINAL E FOLHA OCTREE != FOLHA TOPOLOGIA
+//SINAL ==0 , Nao tem topologia logo nao entra. SINAL ==1 tem, entra
+//topologia =0 => tunnnel
+//==1 => folha ,
+//=2 => pontoInterior
 
 

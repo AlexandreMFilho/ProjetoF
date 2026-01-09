@@ -212,16 +212,17 @@ Octree::Octree(int x1, int y1, int z1, int x2, int y2, int z2,Octree* pai,float 
 			++ cont_neg_vert_;
 		if (cube[7] == 0.0) cont_zero_vert_++;
 		}
-		else{
-			for(int p =0; p<8;p++){
-				cube[p] = 0.0 - isovalue_;
-				cont_pos_vert = 8.0;
-				cont_neg_vert = 8.0;
-			}
-		}
+//		else{//Aqui eh para cubos que estao fora do dado, quando o grid temq ser maior na potencia de 2. O dado eh menor mas a potencia de 2 temq ser maior.
+//			for(int p =0; p<8;p++){
+//				cube[p] = 0.0 - isovalue_;
+//				cont_pos_vert = 8.0;
+//				cont_neg_vert = 8.0;
+//			}
+//		}//Nao precisa
 
 		if((cont_pos_vert_ != 8)&&(cont_neg_vert_ != 8)){
-			this->sinal = 1;
+			this->sinal = 1; //Sinal 1 significa que a isosuperficie passa por ele, logo tem informacao para ser visto.
+			//Neste ponto isso somente ocorre nos nos folha da arvore octree
 		}
 	}
 }
@@ -247,27 +248,19 @@ int navega_octree(Octree* oct){  //Da para colocar uma função para ser executa
 //configuração complexa, quer dizer que o merge pode acontecer, caso contrário
 //será necessário entrar para ver os filhos.
 int Octree::sinaliza_octree(Octree* oct){
-	//Quando em um nó folha, verifica a topologia dele e carrega na variável do nó
+	//Quando em um nó folha da octree, verifica a topologia dele e carrega na variável do nó
 	//a topologia e retorna o sinal do nó folha para o pai.
 	if(oct->nivel == oct->nivel_max){
 		//chamar o topology
 		//if(oct->sinal == 1){
-		if((oct->cont_pos_vert_==8)||(oct->cont_neg_vert_==8)){
+		if((oct->cont_pos_vert_==8)||(oct->cont_neg_vert_==8)){//se no estiver vazio ou cheio (vertices todos em 0 ou 1)
 			oct->topology_ =-1;
-			oct->sinal = 1;
-			return 1;//return oct->sinal
+			oct->sinal = 0;/*************************************************/ //se ele esta vazio seu sinal deve ser 0 ?
+			return 1;//return oct->sinal   //retorno deveria ser o sinal
 		}
-		else{
+		else{//se nao ta vazio, precisa ver a topologia
 			oct->topology_ = topology(oct);
-			if(oct->topology_ ==1)return 1;
-			else return 0;
-			/*
-			//TODO se ele topology=1(LEAF), return topology, else return =0;
-			//TODO OBS retirar linha 244
-		//}
-		return oct->sinal;
-		//TODO
-*/
+			oct->sinal = 1;
 		}
 	}
 	//Se não for um nó folha entra nos 8 filhos trazendo o sinal deles,se todos
@@ -287,7 +280,8 @@ int Octree::sinaliza_octree(Octree* oct){
 
 		//Todos ou nenhum dos nós fihos possuem topologia simples, nó pai recebe 0,
 		//e pode ser vitima do merge.
-		if(cont == 8){
+
+		if(cont != 0){
 			//SE contador ==8, signal =1(faz merge), else signal =0(não faz)
 			oct->sinal = 1;
 
@@ -486,12 +480,17 @@ void Octree::mesh(Octree* oct){
 	std::vector<AddPoints> extrapoints;
 	extrapoints.clear();
 
-	if(oct->isfather){
+	if(oct->isfather ){
 		for(int i=0;i<8;i++){
+			if(oct->sinal == 1 ){
 			mesh(oct->children[i]);
+
+			}
 		}
+			//Se o sinal for 0 nem entra
+
 	}else{
-		if(oct->topology_ == LEAF){
+		if(oct->sinal == 1){
 			for(int i =0;i<8;i++){
 				_cube[i] = oct->cube[i];
 			}
@@ -503,7 +502,7 @@ void Octree::mesh(Octree* oct){
 			_k = oct->V_0->z;
 			_interior_topology = oct->topology_;
 			extrapoints = triangulation(oct);
-			if(extrapoints.size() >0)throw_dot_on_uncle(oct,extrapoints);
+//			if(extrapoints.size() >0)throw_dot_on_uncle(oct,extrapoints);
 		}
 	}
 }
