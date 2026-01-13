@@ -336,7 +336,7 @@ Octree::Octree(int x1, int y1, int z1, int x2, int y2, int z2,Octree* pai,float 
 }
 ```
 
-### Condição citada
+#### Condição citada (condição else comentada)
 ```C++
 ...
 		if (cube[7] == 0.0) cont_zero_vert_++;
@@ -354,9 +354,9 @@ Octree::Octree(int x1, int y1, int z1, int x2, int y2, int z2,Octree* pai,float 
 Este else, é a parte citada acima.
 Este código preenche com 0 os vértices a mais para o dado ficar dentro de um cubo perfeito.
 
-## Voltando para a Run e seguindo
+### Voltando para a Run e seguindo
 
-### Dentro de Sinaliza Octree
+#### Dentro de `sinaliza_octree()`
 ```C++
 int Octree::sinaliza_octree(Octree* oct){
 	//Quando em um nó folha da octree, verifica a topologia dele e carrega na variável do nó
@@ -406,18 +406,20 @@ int Octree::sinaliza_octree(Octree* oct){
 	return oct->sinal;
 }
 ```
-Primeiro if `if(oct->nivel == oct->nivel_max){...}` verifica se o nó atual é um nó folha da octree, logo é o próprio voxel. Dentro dele ele checa: 
+Primeiro if `if(oct->nivel == oct->nivel_max){...}` verifica se o nó atual é um nó folha da octree, logo é o próprio voxel.
+
+* Dentro dele ele checa: 
 
 
-`if((oct->cont_pos_vert_==8)||(oct->cont_neg_vert_==8)){...}`
+	`if((oct->cont_pos_vert_==8)||(oct->cont_neg_vert_==8)){...}`
 
-Se este voxel está vazio (*TODOS* os vértices são positivo ou negativos)
+	Se este voxel está vazio (*TODOS* os vértices são positivo ou negativos)
     neste caso fica a dúvida, se ele está vazio (isosuperfície não corta o voxel, o valor da topologia fica -1, mas o sinal deveria ser 0 e o retorno deveria ser o próprio sinal, pois a recursão da função `sinaliza_octree()` depende desse retorno, explicarei mais a frente.)
 
 
-`else{...}`
+	`else{...}`
 
-Se não estiver vazio, chama topology para determinar a topologia, seu sinal recebe 1 (existe informação) e deveria ter um `return oct->sinal` ali tbm.
+	Se não estiver vazio, chama `topology()` para determinar a topologia, seu sinal recebe 1 (existe informação) e deveria ter um `return oct->sinal` ali tbm.
 
 
 ``` 
@@ -433,3 +435,166 @@ Topology:
  * 1: significa que a isosuperficie passa por ele, logo tem informacao para ser visto.
 ```
 
+No `else` seguinte acontece quando o nó não é uma folha da octree, então ele está entre o nó raiz e os nós folha da octree. Temos uma variável `cont` que recebe o retorno de `sinaliza_octree()` para cada um dos 8 filhos do nó. Este retorno foi o citado acima. Em teoria `cont` é um contador, onde se o contador 
+* diferente de 0, siginifica que algum filho possui dado dentro, tem a isosuperfície passando em si, por isso não podemos eleger ele a merge inicialmente. Assim ele coloca em si o sinal 1.
+* for 0 todos os filhos retornaram 0, logo: está vazio, podemos eleger ele a merge. assim ele mesmo se tornará o nó folha da octree após os `merge()`. Assim ele coloca em si o sinal 0.
+
+<!--
+Source - https://stackoverflow.com/a
+Posted by Waylan, modified by community. See post 'Timeline' for change history
+Retrieved 2026-01-13, License - CC BY-SA 4.0
+-->
+
+ <span style="color:red">Necessario verificar retorno de `sinaliza_octree()`, parece haver confusão de conceitos e usabilidade das variáveis</span>.
+
+Após a execução de `sinaliza_octree()` é executado o `mesh()`, aqui deveria ocorrer o `merge()` antes. Na situação atual, não estamos seguindo com o merge.
+
+### Dentro de `mesh()`
+
+```C++
+void Octree::mesh(Octree* oct){
+	std::vector<AddPoints> extrapoints;
+	extrapoints.clear();
+
+	if(oct->isfather ){
+		for(int i=0;i<8;i++){
+			if(oct->sinal == 1 ){
+			mesh(oct->children[i]);
+
+			}
+		}
+			//Se o sinal for 0 nem entra
+
+	}else{
+		if(oct->sinal == 1){
+			for(int i =0;i<8;i++){
+				_cube[i] = oct->cube[i];
+			}
+			cont_pos_vert = oct->cont_pos_vert_;
+			cont_zero_vert = oct->cont_zero_vert_;
+			cont_neg_vert = oct->cont_neg_vert_;
+			_i = oct->V_0->x;
+			_j = oct->V_0->y;
+			_k = oct->V_0->z;
+			_interior_topology = oct->topology_;
+			extrapoints = triangulation(oct);
+//			if(extrapoints.size() >0)throw_dot_on_uncle(oct,extrapoints);
+		}
+	}
+}
+
+ ```
+
+inicializamos um `vector`, que ficará responsável por pegar as informações dos nós filhos, para na fase do crack-patching corrigir o comportamento da isosuperfício nesse nós que recebeu merge.
+
+* `if(oct->isfather ){` 
+	
+	Verifica se esse nós um nó pai (possui filhos abaixo/dentro de si) e chama o `mesh()` (recursivamente) em cada um dos nós filhos.
+
+* `}else{`
+
+	Quando o nó não é pai, ele só pode ser uma folha da octree, nesse caso, inicializamos as variáveis globais com os dados deste nó, para então chamar `triangulation()`.
+	
+	* existe uma linha comentada, onde após a triangulação seria colocado nesse mesmo nó informações adicionais dos seus nós filhos (para o crack-patching) `if(extrapoints.size() >0)throw_dot_on_uncle(oct,extrapoints);` neste momento não olharemos ela.
+
+Desta forma, essa função percorre a octree, e quando chega no pai acima das folhas, chama mesh para seus filhos, e quando chega neles (nós folha da octree) faz a triangulação da isosuperfície dentro desse nó.
+
+
+### merge()
+
+```C++
+void Octree::merge(Octree * oct){
+
+	//int cont = 0;
+	bool issimple = true, domerge = true;
+	Octree* p= nullptr;
+
+	if(oct->nivel == oct->nivel_max - 1){
+
+		//Percorre os filhos pegando o sinal e a topologia
+		for(int i=0;i<8;i++){
+			//cont += oct->children[i]->sinal;
+			//top[i] = oct->children[i]->topology_;
+			if(oct->children[i]->topology_ == 0 || oct->children[i]->topology_ == 2 || oct->children[i]->topology_ == 3){
+				issimple = false;
+				domerge = false;
+				break;
+			}
+/*
+			if(!issimple){
+				break;
+			}*/
+		}
+
+		//SE Todos os filhos estão vazios
+		if(domerge){
+			//Merge e mata os filhos
+			oct->isfather = false;
+			for(int i=0;i<8;i++){
+				oct->cube[i] = oct->children[i]->cube[i];
+				p = oct->children[i];
+				p->parent = nullptr;
+				oct->children[i] = nullptr;
+				//delete(p);
+			}
+			oct->topology_ = LEAF;
+			oct->merge_step = oct->merge_step *2;
+		//SENAO Verificar se são casos simples
+		}
+	}
+	else{
+		merge(oct->children[0]);
+		merge(oct->children[1]);
+		merge(oct->children[2]);
+		merge(oct->children[3]);
+		merge(oct->children[4]);
+		merge(oct->children[5]);
+		merge(oct->children[6]);
+		merge(oct->children[7]);
+	}
+
+/*Vai até o penultimo nível e verifica se é possível
+ *fazer o merge com os filhos.
+	Se todos vazios fazer o merge.
+	 merge {
+	 Incializar os vertices do no pai com vertices I dos filhos I.
+	Matar os 8 filhos.
+	}
+	Se tiver alguém la dentro. se (sinal == 1)
+*/
+}
+
+//-----------------------------------------------------------------------------------------------20/07/22
+/*
+ * Ao ocorrer o merge, navegar até as folhas e em cada ponto de interseção, verificar nele.
+ * 1 - a face do nó que ele se encontra.
+ * pela tabela 1 de correspondência de faces entre filho e pai e descobrir se esse ponto está em uma face
+ * interna ou externa.
+ * TABELA 1
+ * face nó corrente |
+ * 			0
+ * (interna, ele divide com o irmão) (externa, face x do filho corresponde a face x do pai.)
+ * se interna, passar para o próximo ponto de interseção.
+ * se externa, verificar na tabela 2 de correspondência de faces entre irmãos subindo os níveis procurando
+ * nos irmãos do nó corrente a face do
+ * corrente
+ *
+*/
+//-----------------------------------------------------------------------------------------------
+
+```
+
+* `if(oct->nivel == oct->nivel_max - 1){`
+
+	Aqui verificamos se o nó é o pai acima das folhas da octree, então dentro dos filhos dele, verificamos a topologia deles, se qualquer filho tiver a topologia (0, 2 ou 3), setamos as variáveis (`issimple`, `domerge`) que demonstram se a topologia é simples e se pode fazer o merge como `false` (variáveis essas do nó pai/atual). Como nesse método inicializamos essa variáveis em true, o caso contrário não precisa ser feito e assim, se após isso, as variáveis não receberem `false` significa que **TODOS** os filhos são de topologia simples.
+
+	então, após essa verificação se `domerge` for `true`, este nó agora não será mais um nó pai (`oct->isfather = false;`) e sim será a nova folha da octree.
+	Então ele recebe em seus vértices os vértices os vértices dos seus respectivos filhos, com um ponteiro entra no filho, retirando a conexão do filho com o pai, para então o nó filho deixar de existir (`p = oct->children[i];
+				p->parent = nullptr; oct->children[i] = nullptr;`)
+				Após isso o nó atual recebe a `topologia de folha` e seu `merge_step` é multiplicado por 2. *essa variável ela serve para *saber qual o tamanho do cubo em dimensão, inicialmente ele tem tamanho 1, com o 1º merge 2, segundo 4 e assim por diante. É a quantidade e cubos que compoẽm um lado.
+
+* `else{`
+
+	Se nó não for o pai acima das folhas da octree, chama recursivamente `merge()`.
+
+Neste ponto o merge apenas ocorre no penultimo nível da octree devido a verificação `oct->nivel == oct->nivel_max - 1`, para que ele percorra até achar o pai acima de qualquer folha da octree, será necessário mudar essa condição.

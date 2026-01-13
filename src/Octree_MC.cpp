@@ -3311,7 +3311,7 @@ void fecha_arquivo(FILE* file){
 int main(int argc, char **argv)
 {
   printf("Extented Marching Cubes 33:\n");
-
+  int result;
 
    /* if(argc != 4)
 	    {
@@ -3333,7 +3333,7 @@ int main(int argc, char **argv)
 
 //  	output_debug_file = "/home/dgti/REPOS/ProjetoF/output/debug/7-scalar_field.txt";
 
-    run(filename);
+  result = run(filename);
 	//fecha_arquivo(arquivo);
 	printf("Program ended..\n");
 	return 0;
