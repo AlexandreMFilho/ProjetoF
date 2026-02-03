@@ -2820,7 +2820,7 @@ int main(int argc, char **argv)
 
 
     char* filename    = "/home/note_msi/ProjetoF/dados_teste/7-scalar_field.nhdr";
-	isovalue = 48.5;
+	isovalue = 0.0;//48.5; //0.0
 	output_mesh_file = "/home/note_msi/ProjetoF/output/7-scalar_field_model.off";
 
 

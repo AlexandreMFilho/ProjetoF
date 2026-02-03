@@ -212,13 +212,13 @@ Octree::Octree(int x1, int y1, int z1, int x2, int y2, int z2,Octree* pai,float 
 			++ cont_neg_vert_;
 		if (cube[7] == 0.0) cont_zero_vert_++;
 		}
-//		else{//Aqui eh para cubos que estao fora do dado, quando o grid temq ser maior na potencia de 2. O dado eh menor mas a potencia de 2 temq ser maior.
-//			for(int p =0; p<8;p++){
-//				cube[p] = 0.0 - isovalue_;
-//				cont_pos_vert = 8.0;
-//				cont_neg_vert = 8.0;
-//			}
-//		}//Nao precisa
+		else{//Aqui eh para cubos que estao fora do dado, quando o grid temq ser maior na potencia de 2. O dado eh menor mas a potencia de 2 temq ser maior.
+			for(int p =0; p<8;p++){
+				cube[p] = 0.0 - isovalue_;
+				cont_pos_vert = 0.0;
+				cont_neg_vert = 8.0;
+			}
+		}//Nao precisa
 
 		if((cont_pos_vert_ != 8)&&(cont_neg_vert_ != 8)){
 			this->sinal = 1; //Sinal 1 significa que a isosuperficie passa por ele, logo tem informacao para ser visto.
@@ -252,11 +252,11 @@ int Octree::sinaliza_octree(Octree* oct){
 	//a topologia e retorna o sinal do nó folha para o pai.
 	if(oct->nivel == oct->nivel_max){
 		//chamar o topology
-		// if(oct->sinal == 1){//
+		//if(oct->sinal == 1){
 		if((oct->cont_pos_vert_==8)||(oct->cont_neg_vert_==8)){//se no estiver vazio ou cheio (vertices todos em 0 ou 1)
 			oct->topology_ =-1;
 			oct->sinal = 0;/*************************************************/ //se ele esta vazio seu sinal deve ser 0 ?
-			return 1;//return oct->sinal   //retorno deveria ser o sinal
+			return oct->sinal;   //retorno deveria ser o sinal
 		}
 		else{//se nao ta vazio, precisa ver a topologia
 			oct->topology_ = topology(oct);
