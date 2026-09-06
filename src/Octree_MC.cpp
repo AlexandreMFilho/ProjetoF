@@ -3244,7 +3244,14 @@ int run(char* file)
 	}*/
 
 	oct->sinaliza_octree(oct);
+	oct->merge(oct);
 	oct->mesh(oct);
+
+	output_debug_file = "/home/dgti_xande/saidas_mc/files/fuel_OCT_iso_19-1_3.txt";
+	FILE* aux = fopen(output_debug_file,"w");
+
+	oct->visualiza_octree_F(oct,aux);
+
 
 	// printf("done!\n");
 
@@ -3376,16 +3383,17 @@ int main(int argc, char **argv)
 //  				isovalue = 100.1;
 //  				output_mesh_file = "/home/dgti_xande/saidas_mc/aneurism_OCT_iso_100-1.off";
 
-//  				nomeArquivo = "fuel";
-//  				char* filename = "/home/dgti_xande/entradas_mc/fuel.nhdr";
-//  				isovalue = 19.1;
-//  				output_mesh_file = "/home/dgti_xande/saidas_mc/fuel_OCT_iso_19-1.off";
+  				nomeArquivo = "fuel";
+  				char* filename = "/home/dgti_xande/entradas_mc/fuel.nhdr";
+  				isovalue = 19.1;
+  				output_mesh_file = "/home/dgti_xande/saidas_mc/fuel_OCT_iso_19-1_3.off";
 
 
-  				nomeArquivo = "CT-Chest";
-  				char* filename = "/home/dgti_xande/entradas_mc/CT-Chest.nhdr";
-  				isovalue = 48.5;
-  				output_mesh_file = "/home/dgti_xande/saidas_mc/CT-Chest_OCT_iso_48-5.off";
+
+//  				nomeArquivo = "CT-Chest";
+//  				char* filename = "/home/dgti_xande/entradas_mc/CT-Chest.nhdr";
+//  				isovalue = 48.5;
+//  				output_mesh_file = "/home/dgti_xande/saidas_mc/CT-Chest_OCT_iso_48-5.off";
 
 
 
@@ -3401,5 +3409,8 @@ int main(int argc, char **argv)
 //topologia =0 => tunnnel
 //==1 => folha ,
 //=2 => pontoInterior
+//=3 => Na face
+//=4 => cubo vazio
+
 
 
