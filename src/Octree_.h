@@ -8,8 +8,8 @@
 #include <iostream>
 #include <vector>
 
+extern int cubos_vazios_total;
 float *matriz = nullptr;
-
 using namespace std;
 
 //int size_x, size_y, size_z;
@@ -254,6 +254,7 @@ int Octree::sinaliza_octree(Octree* oct){
 		//chamar o topology
 		//if(oct->sinal == 1){
 		if((oct->cont_pos_vert_==8)||(oct->cont_neg_vert_==8)){//se no estiver vazio ou cheio (vertices todos em 0 ou 1)
+			cubos_vazios_total++;
 			oct->topology_ =-1;
 			oct->sinal = 0;/*************************************************/ //se ele esta vazio seu sinal deve ser 0 ?
 			return oct->sinal;   //retorno deveria ser o sinal
