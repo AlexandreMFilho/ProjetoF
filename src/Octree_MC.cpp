@@ -1,6 +1,10 @@
 #include "Octree_.h"
 #include <stdio.h>
+int cubos_vazios_total = 0;
+int cubos_total =0;
 
+
+char* nomeArquivo;
  //========================================================================================================
 void write_mesh()
 {
@@ -3144,10 +3148,11 @@ int run(char* file)
 	//	visited_cube[i] = -1;
 
 
-	printf("ExtendedMC33:: Draw triangulation...\n");
-
+	printf("Octree_MC:: Draw triangulation...\n");
+	int max_dim = fmax(size_x, fmax(size_y, size_z));
+	int nivel_maximo = ceil(log2(max_dim));
 //	 Octree* oct = new Octree(0,0,0,maior_pot_2(size_x),maior_pot_2(size_y),maior_pot_2(size_z),nullptr,isovalue,0,pot_2(fmax(size_x,fmax(size_y,size_z))),0);
-	Octree* oct = new Octree(0,0,0,real_size_x,real_size_y,real_size_z,nullptr,isovalue,0,pot_2(fmax(real_size_x,fmax(real_size_y,real_size_z))-1),0);
+	Octree* oct = new Octree(0,0,0,size_x,size_y,size_z,nullptr,isovalue,0,nivel_maximo,0);
 
 
 	/*
@@ -3243,7 +3248,7 @@ int run(char* file)
 
 	// printf("done!\n");
 
-	printf("ExtendedMC33:: Writing mesh...");
+	printf("\nOctree_MC:: Writing mesh...");
 	delete[]e_group;
 	delete[] group_of_edges;
 	delete[]group_trigs;
@@ -3264,6 +3269,30 @@ int run(char* file)
 	_z.clear();
 
 	printf("done!\n");
+
+	// Calcula os totais de cubos
+	int cubos_total_octree = (real_size_x-1) * (real_size_y-1) * (real_size_z-1);
+	int cubos_total_dado = (size_x - 1) * (size_y - 1) * (size_z - 1);
+
+	int vazios_total_octree = cubos_vazios_total + (cubos_total_octree - cubos_total_dado);
+
+	// Cálculos das porcentagens de descarte/compressão
+	float taxa_descarte_dado = (cubos_vazios_total * 100.0) / cubos_total_dado;
+	float taxa_descarte_octree = (vazios_total_octree * 100.0) / cubos_total_octree;
+
+
+
+	printf("\Octree=====================");
+	printf("[Dado:%s]",nomeArquivo);
+	printf("\n\n[Análise do Dado Real]");
+	printf("\nGrid Dado Real: x%d y%d z%d", size_x, size_y, size_z);
+	printf("\nQuantidade de cubos: %d | Cubos vazios: %d", cubos_total_dado, cubos_vazios_total);
+	printf("\nTaxa de descarte (Espaço vazio original): %.2f%% (%d/%d)\n", taxa_descarte_dado, cubos_vazios_total, cubos_total_dado);
+
+	printf("\n[Análise da Octree (Virtual)]");
+	printf("\nGrid Octree (Virtual): x%d y%d z%d", real_size_x, real_size_y, real_size_z);
+	printf("\nQuantidade de cubos: %d | Cubos vazios: %d", cubos_total_octree, vazios_total_octree);
+	printf("\nTaxa de descarte total (Incluindo padding): %.2f%% (%d/%d)\n", taxa_descarte_octree, vazios_total_octree, cubos_total_octree);
 
 
 	return 0;
@@ -3310,7 +3339,7 @@ void fecha_arquivo(FILE* file){
 //===================================================================================================
 int main(int argc, char **argv)
 {
-  printf("Extented Marching Cubes 33:\n");
+  printf("Octree_Marching Cubes:\n");
 
 
    /* if(argc != 4)
@@ -3325,13 +3354,40 @@ int main(int argc, char **argv)
 
   	// /home/alexandre/input/uva.txt
 
-    char* filename = "/home/note_msi/ProjetoF/dados_teste/7-scalar_field.nhdr";
-	isovalue = 0.0;// 19.1 para fuel  0 pros demais
-	//output_mesh_file = "/home/alexandre/eclipse-workspace/Extended_MC_/output/ct-chest-48-5.off";
+  //0-scalar_field - isovalor 0.2
 
-  	output_mesh_file = "/home/note_msi/ProjetoF/output/7-scalar_field_novo.off";
-
+  //old
+//  	char* filename = "/home/dgti_xande/entradas_mc/4-scalar_field.nhdr";
+//		isovalue = 0.0;// 19.1 para fuel  0 pros demais
+//		output_mesh_file = "/home/alexandre/eclipse-workspace/Extended_MC_/output/ct-chest-48-5.off";
+//  	output_mesh_file = "/home/dgti_xande/saidas_mc/4-scalar_field_OCT_iso_0-0.off"
 //  	output_debug_file = "/home/dgti/REPOS/ProjetoF/output/debug/7-scalar_field.txt";
+
+
+
+  			//	nomeArquivo = "4-scalar_field";
+  			//	char* filename = "/home/dgti_xande/entradas_mc/4-scalar_field.nhdr";
+  			//	isovalue = 0.0;
+  			//	snap = 0.0;
+  			//	output_mesh_file = "/home/dgti_xande/saidas_mc/4-scalar_field_OCT_iso_0-0.off";
+
+//  				nomeArquivo = "aneurism";
+//  				char* filename = "/home/dgti_xande/entradas_mc/aneurism.nhdr";
+//  				isovalue = 100.1;
+//  				output_mesh_file = "/home/dgti_xande/saidas_mc/aneurism_OCT_iso_100-1.off";
+
+//  				nomeArquivo = "fuel";
+//  				char* filename = "/home/dgti_xande/entradas_mc/fuel.nhdr";
+//  				isovalue = 19.1;
+//  				output_mesh_file = "/home/dgti_xande/saidas_mc/fuel_OCT_iso_19-1.off";
+
+
+  				nomeArquivo = "CT-Chest";
+  				char* filename = "/home/dgti_xande/entradas_mc/CT-Chest.nhdr";
+  				isovalue = 48.5;
+  				output_mesh_file = "/home/dgti_xande/saidas_mc/CT-Chest_OCT_iso_48-5.off";
+
+
 
     run(filename);
 	//fecha_arquivo(arquivo);
