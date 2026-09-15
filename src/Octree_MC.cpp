@@ -12,14 +12,14 @@ void write_mesh()
 	vector<Point3f> coordVec;
 	vector<Point3i> indexVec;
 
-	for(int t = 0;t<n_trig;++t)
+	for(int t = 0;t<final_nTrig;++t)
 	{
 	   coordVec.push_back(Point3f(_x[3 * t],_y[3 * t],_z[3 * t]));
 	   coordVec.push_back(Point3f(_x[3 * t + 1],_y[3 * t + 1],_z[3 * t + 1]));
 	   coordVec.push_back(Point3f(_x[3 * t + 2],_y[3 * t + 2],_z[3 * t + 2]));
 	}
 
-	for(int i = 0; i < n_trig; ++i)
+	for(int i = 0; i < final_nTrig; ++i)
 		{indexVec.push_back(Point3i(3*i, 3*i + 1, 3*i + 2));}
 
 	tri::BuildMeshFromCoordVectorIndexVector(Mesh,coordVec,indexVec);
@@ -116,8 +116,11 @@ void read_nhdr(char *filename)
 
 float get_data(const int i, const int j, const int k)
 {
-		return f_grid_data[i + j * size_x + k * size_x * size_y];
-
+    // Escudo: Se sair do mapa, simula espaço vazio
+    if (i >= size_x || j >= size_y || k >= size_z || i < 0 || j < 0 || k < 0) {
+        return 0.0f;
+    }
+    return f_grid_data[i + j * size_x + k * size_x * size_y];
 }
 //===================================================================================================
 void set_data(const int i, const int j, const int k, float value)
@@ -708,6 +711,8 @@ std::vector<AddPoints> leaf_triangulation(Octree* node) {
             snap_mesh_cube.push_back(_j);
             snap_mesh_cube.push_back(_k);
 
+            snap_mesh_step.push_back(node->merge_step);
+
             n_trig++;
           }
         }
@@ -899,6 +904,8 @@ std::vector<AddPoints> leaf_triangulation(Octree* node) {
           snap_mesh_cube.push_back(_j);
           snap_mesh_cube.push_back(_k);
 
+          snap_mesh_step.push_back(node->merge_step);
+
           n_trig++;
            
           if (node->nivel == node->nivel_max)
@@ -944,6 +951,8 @@ vector<AddPoints> on_face_triangulation(int *verts, int n_vert,Octree* node)
     snap_mesh_cube.push_back(_j);
     snap_mesh_cube.push_back(_k);
 
+    snap_mesh_step.push_back(node->merge_step);
+
     n_trig++;
   }
 
@@ -962,6 +971,8 @@ vector<AddPoints> on_face_triangulation(int *verts, int n_vert,Octree* node)
     snap_mesh_cube.push_back(_j);
     snap_mesh_cube.push_back(_k);
 
+    snap_mesh_step.push_back(node->merge_step);
+
     n_trig++;
 
     snap_mesh_element.push_back('v');
@@ -975,6 +986,8 @@ vector<AddPoints> on_face_triangulation(int *verts, int n_vert,Octree* node)
     snap_mesh_cube.push_back(_i);
     snap_mesh_cube.push_back(_j);
     snap_mesh_cube.push_back(_k);
+
+    snap_mesh_step.push_back(node->merge_step);
 
     n_trig++;
   }
@@ -1163,6 +1176,8 @@ vector<AddPoints> tunnel_triangulation(Octree* node)
         snap_mesh_cube.push_back(_j);
         snap_mesh_cube.push_back(_k);
 
+        snap_mesh_step.push_back(node->merge_step);
+
         n_trig++;
         
         if (node->nivel == node->nivel_max)
@@ -1222,6 +1237,8 @@ vector<AddPoints> tunnel_triangulation(Octree* node)
       snap_mesh_cube.push_back(_j);
       snap_mesh_cube.push_back(_k);
 
+      snap_mesh_step.push_back(node->merge_step);
+
       n_trig++;
     if (node->nivel == node->nivel_max)
       {
@@ -1275,6 +1292,8 @@ vector<AddPoints> one_inter_point_triangulation(Octree* node)
             snap_mesh_cube.push_back(_j);
             snap_mesh_cube.push_back(_k);
 
+            snap_mesh_step.push_back(node->merge_step);
+
             n_trig++;
           addpoint.edge = face_edges[i][0];
         	addpoint.x = (vert_coord[edge_nodes[addpoint.edge][0]][0]+ vert_coord[edge_nodes[addpoint.edge][1]][0])/ 2;
@@ -1300,6 +1319,8 @@ vector<AddPoints> one_inter_point_triangulation(Octree* node)
             snap_mesh_cube.push_back(_i);
             snap_mesh_cube.push_back(_j);
             snap_mesh_cube.push_back(_k);
+
+            snap_mesh_step.push_back(node->merge_step);
 
             n_trig++;
              	addpoint.edge = face_edges[i][2];
@@ -1349,6 +1370,8 @@ vector<AddPoints> one_inter_point_triangulation(Octree* node)
               snap_mesh_cube.push_back(_j);
               snap_mesh_cube.push_back(_k);
 
+              snap_mesh_step.push_back(node->merge_step);
+
               n_trig++;
     
            	addpoint.edge = face_edges[i][0];
@@ -1378,6 +1401,8 @@ vector<AddPoints> one_inter_point_triangulation(Octree* node)
               snap_mesh_cube.push_back(_i);
               snap_mesh_cube.push_back(_j);
               snap_mesh_cube.push_back(_k);
+
+              snap_mesh_step.push_back(node->merge_step);
 
               n_trig++;
             addpoint.edge = face_edges[i][2];
@@ -1411,6 +1436,8 @@ vector<AddPoints> one_inter_point_triangulation(Octree* node)
             snap_mesh_cube.push_back(_j);
             snap_mesh_cube.push_back(_k);
 
+            snap_mesh_step.push_back(node->merge_step);
+
             n_trig++;
           addpoint.edge = face_edges[i][3];
          	addpoint.x = (vert_coord[edge_nodes[addpoint.edge][0]][0]+ vert_coord[edge_nodes[addpoint.edge][1]][0])/ 2;
@@ -1434,6 +1461,8 @@ vector<AddPoints> one_inter_point_triangulation(Octree* node)
             snap_mesh_cube.push_back(_i);
             snap_mesh_cube.push_back(_j);
             snap_mesh_cube.push_back(_k);
+
+            snap_mesh_step.push_back(node->merge_step);
 
             n_trig++;
           addpoint.edge = face_edges[i][1];
@@ -1484,6 +1513,8 @@ vector<AddPoints> one_inter_point_triangulation(Octree* node)
               snap_mesh_cube.push_back(_j);
               snap_mesh_cube.push_back(_k);
 
+              snap_mesh_step.push_back(node->merge_step);
+
               n_trig++;
            	addpoint.edge = face_edges[i][0];
            	addpoint.x = (vert_coord[edge_nodes[addpoint.edge][0]][0]+ vert_coord[edge_nodes[addpoint.edge][1]][0])/ 2;
@@ -1511,6 +1542,8 @@ vector<AddPoints> one_inter_point_triangulation(Octree* node)
               snap_mesh_cube.push_back(_i);
               snap_mesh_cube.push_back(_j);
               snap_mesh_cube.push_back(_k);
+
+              snap_mesh_step.push_back(node->merge_step);
 
               n_trig++;
             addpoint.edge = face_edges[i][1];
@@ -1548,6 +1581,8 @@ vector<AddPoints> one_inter_point_triangulation(Octree* node)
             snap_mesh_cube.push_back(_j);
             snap_mesh_cube.push_back(_k);
 
+            snap_mesh_step.push_back(node->merge_step);
+
             n_trig++;
 	        addpoint.edge = face_edges[i][0];
          	addpoint.x = (vert_coord[edge_nodes[addpoint.edge][0]][0]+ vert_coord[edge_nodes[addpoint.edge][1]][0])/ 2;
@@ -1571,6 +1606,8 @@ vector<AddPoints> one_inter_point_triangulation(Octree* node)
             snap_mesh_cube.push_back(_i);
             snap_mesh_cube.push_back(_j);
             snap_mesh_cube.push_back(_k);
+
+            snap_mesh_step.push_back(node->merge_step);
 
             n_trig++;
 
@@ -1621,6 +1658,8 @@ vector<AddPoints> one_inter_point_triangulation(Octree* node)
               snap_mesh_cube.push_back(_j);
               snap_mesh_cube.push_back(_k);
 
+              snap_mesh_step.push_back(node->merge_step);
+
               n_trig++;
             addpoint.edge = face_edges[i][0];
            	addpoint.x = (vert_coord[edge_nodes[addpoint.edge][0]][0]+ vert_coord[edge_nodes[addpoint.edge][1]][0])/ 2;
@@ -1649,6 +1688,8 @@ vector<AddPoints> one_inter_point_triangulation(Octree* node)
               snap_mesh_cube.push_back(_i);
               snap_mesh_cube.push_back(_j);
               snap_mesh_cube.push_back(_k);
+
+              snap_mesh_step.push_back(node->merge_step);
 
               n_trig++;
             addpoint.edge = face_edges[i][2];
@@ -1683,6 +1724,8 @@ vector<AddPoints> one_inter_point_triangulation(Octree* node)
             snap_mesh_cube.push_back(_j);
             snap_mesh_cube.push_back(_k);
 
+            snap_mesh_step.push_back(node->merge_step);
+
             n_trig++;
           addpoint.edge = face_edges[i][0];
          	addpoint.x = (vert_coord[edge_nodes[addpoint.edge][0]][0]+ vert_coord[edge_nodes[addpoint.edge][1]][0])/ 2;
@@ -1707,6 +1750,8 @@ vector<AddPoints> one_inter_point_triangulation(Octree* node)
             snap_mesh_cube.push_back(_i);
             snap_mesh_cube.push_back(_j);
             snap_mesh_cube.push_back(_k);
+
+            snap_mesh_step.push_back(node->merge_step);
 
             n_trig++;
           addpoint.edge = face_edges[i][2];
@@ -1756,6 +1801,8 @@ vector<AddPoints> one_inter_point_triangulation(Octree* node)
               snap_mesh_cube.push_back(_j);
               snap_mesh_cube.push_back(_k);
 
+              snap_mesh_step.push_back(node->merge_step);
+
               n_trig++;
             addpoint.edge = face_edges[i][0];
            	addpoint.x = (vert_coord[edge_nodes[addpoint.edge][0]][0]+ vert_coord[edge_nodes[addpoint.edge][1]][0])/ 2;
@@ -1784,6 +1831,8 @@ vector<AddPoints> one_inter_point_triangulation(Octree* node)
               snap_mesh_cube.push_back(_i);
               snap_mesh_cube.push_back(_j);
               snap_mesh_cube.push_back(_k);
+
+              snap_mesh_step.push_back(node->merge_step);
 
               n_trig++;
             addpoint.edge = face_edges[i][2];
@@ -1833,6 +1882,8 @@ vector<AddPoints> one_inter_point_triangulation(Octree* node)
         snap_mesh_cube.push_back(_j);
         snap_mesh_cube.push_back(_k);
 
+        snap_mesh_step.push_back(node->merge_step);
+
         n_trig++;
 
       addpoint.edge = face_edges[i][0];
@@ -1873,6 +1924,8 @@ vector<AddPoints> one_inter_point_triangulation(Octree* node)
           snap_mesh_cube.push_back(_j);
           snap_mesh_cube.push_back(_k);
 
+          snap_mesh_step.push_back(node->merge_step);
+
           n_trig++;
 
         }
@@ -1891,6 +1944,8 @@ vector<AddPoints> one_inter_point_triangulation(Octree* node)
           snap_mesh_cube.push_back(_j);
           snap_mesh_cube.push_back(_k);
 
+          snap_mesh_step.push_back(node->merge_step);
+
           n_trig++;
 
           snap_mesh_element.push_back('e');
@@ -1904,6 +1959,8 @@ vector<AddPoints> one_inter_point_triangulation(Octree* node)
           snap_mesh_cube.push_back(_i);
           snap_mesh_cube.push_back(_j);
           snap_mesh_cube.push_back(_k);
+
+          snap_mesh_step.push_back(node->merge_step);
 
           n_trig++;
 
@@ -1929,6 +1986,8 @@ vector<AddPoints> one_inter_point_triangulation(Octree* node)
         snap_mesh_cube.push_back(_i);
         snap_mesh_cube.push_back(_j);
         snap_mesh_cube.push_back(_k);
+
+        snap_mesh_step.push_back(node->merge_step);
 
         n_trig++;
       addpoint.edge = face_edges[j][0];
@@ -2319,7 +2378,8 @@ void teste_read_triangulation(Octree* oct)
   final_nTrig = 0;
 
 
-  int step_size = oct->merge_step;
+  //int step_size = oct->merge_step;
+
 
   if(!_x.empty())
   {
@@ -2330,6 +2390,7 @@ void teste_read_triangulation(Octree* oct)
 
   for(int trig = 0; trig < n_trig; trig++)
   {
+	int step_size = snap_mesh_step[trig];
 
     s[0] = snap_mesh_element[3*trig];
     v[0] = snap_mesh_index[3*trig];
@@ -2419,140 +2480,123 @@ void teste_read_triangulation(Octree* oct)
           break;
         }
 
-        t = -a / (b - a);
+        if ((b - a) == 0.0f) {
+                t = 0.5f; // Ponto médio seguro caso os isovalores sejam idênticos
+            } else {
+                t = -a / (b - a);
+            }
 
         switch (v[i])
-        {
-        case 0:
-          y = ( j_ * sy);
-          z = ( i_ * sx);
-          x = (sz * size_z - ( k_ * sz + t * sz*step_size));
-          break;
-
-        case 1:
-          y = ( j_ * sy + t * sy*step_size);
-          z = ( i_ * sx);
-          x = ( sz * size_z - (k_ * sz + sz));
-          break;
-
-        case 2:
-          y = (  j_ * sy + sy);
-          z = (  i_ * sx);
-          x = (  sz * size_z -( k_ * sz + t * sz*step_size));
-          break;
-
-        case 3:
-          y = ( j_ * sy + t * sy*step_size);
-          z = ( i_ * sx);
-          x = ( sz * size_z -( k_ * sz));
-          break;
-
-        case 4:
-          y = ( j_ * sy);
-          z = ( i_ * sx + sx);
-          x = ( sz * size_z - (k_ * sz + t * sz*step_size));
-          break;
-
-        case 5:
-          y = (  j_ * sy + t * sy*step_size);
-          z = (  i_ * sx + sx);
-          x = ( sz * size_z - (k_ * sz + sz));
-          break;
-
-        case 6:
-          y = (j_ * sy + sy);
-          z = (i_ * sx + sx);
-          x = ( sz * size_z -( k_ * sz + t * sz*step_size));
-          break;
-
-        case 7:
-          y = (  j_ * sy + t * sy*step_size);
-          z = (  i_ * sx + sx);
-          x = ( sz * size_z - ( k_ * sz));
-          break;
-
-        case 8:
-          y = ( j_ * sy);
-          z = ( i_ * sx + t * sx*step_size);
-          x = (sz * size_z -( k_ * sz));
-          break;
-
-        case 9:
-          y = (  j_ * sy);
-          z = (  i_ * sx + t * sx*step_size);
-          x = ( sz * size_z - ( k_ * sz + sz));
-          break;
-
-        case 10:
-          y = ( j_ * sy + sy);
-          z = ( i_ * sx + t * sx*step_size);
-          x = ( sz * size_z - (k_ * sz + sz));
-          break;
-
-        case 11:
-          y = (  j_ * sy + sy);
-          z = (  i_ * sx + t * sx*step_size);
-          x = ( sz * size_z -  (k_ * sz));
-          break;
-        }
+                {
+                case 0:
+                  y = ( j_ * sy);
+                  z = ( i_ * sx);
+                  x = (sz * size_z - ( k_ * sz + t * sz*step_size));
+                  break;
+                case 1:
+                  y = ( j_ * sy + t * sy*step_size);
+                  z = ( i_ * sx);
+                  x = ( sz * size_z - (k_ * sz + sz*step_size)); // Corrigido
+                  break;
+                case 2:
+                  y = (  j_ * sy + sy*step_size); // Corrigido
+                  z = (  i_ * sx);
+                  x = (  sz * size_z -( k_ * sz + t * sz*step_size));
+                  break;
+                case 3:
+                  y = ( j_ * sy + t * sy*step_size);
+                  z = ( i_ * sx);
+                  x = ( sz * size_z -( k_ * sz));
+                  break;
+                case 4:
+                  y = ( j_ * sy);
+                  z = ( i_ * sx + sx*step_size); // Corrigido
+                  x = ( sz * size_z - (k_ * sz + t * sz*step_size));
+                  break;
+                case 5:
+                  y = (  j_ * sy + t * sy*step_size);
+                  z = (  i_ * sx + sx*step_size); // Corrigido
+                  x = ( sz * size_z - (k_ * sz + sz*step_size)); // Corrigido
+                  break;
+                case 6:
+                  y = (j_ * sy + sy*step_size); // Corrigido
+                  z = (i_ * sx + sx*step_size); // Corrigido
+                  x = ( sz * size_z -( k_ * sz + t * sz*step_size));
+                  break;
+                case 7:
+                  y = (  j_ * sy + t * sy*step_size);
+                  z = (  i_ * sx + sx*step_size); // Corrigido
+                  x = ( sz * size_z - ( k_ * sz));
+                  break;
+                case 8:
+                  y = ( j_ * sy);
+                  z = ( i_ * sx + t * sx*step_size);
+                  x = (sz * size_z -( k_ * sz));
+                  break;
+                case 9:
+                  y = (  j_ * sy);
+                  z = (  i_ * sx + t * sx*step_size);
+                  x = ( sz * size_z - ( k_ * sz + sz*step_size)); // Corrigido
+                  break;
+                case 10:
+                  y = ( j_ * sy + sy*step_size); // Corrigido
+                  z = ( i_ * sx + t * sx*step_size);
+                  x = ( sz * size_z - (k_ * sz + sz*step_size)); // Corrigido
+                  break;
+                case 11:
+                  y = (  j_ * sy + sy*step_size); // Corrigido
+                  z = (  i_ * sx + t * sx*step_size);
+                  x = ( sz * size_z -  (k_ * sz));
+                  break;
+                }
       }
 
       if (s[i] == 'v')
-      {
-        switch (v[i])
-        {
-        case 0:
-          y = ( j_ * sy);
-          z = ( i_ * sx);
-          x = ( sz * size_z -  (k_ * sz));
-          break;
-
-        case 1:
-          y = (  j_ * sy);
-          z = (  i_ * sx);
-          x = ( sz * size_z -  (k_ * sz + sz));
-          break;
-
-        case 2:
-          y = (  j_ * sy + sy);
-          z = (  i_ * sx);
-          x = ( sz * size_z -  (k_ * sz + sz));
-          break;
-
-        case 3:
-          y = ( j_ * sy + sy);
-          z = ( i_ * sx);
-          x = ( sz * size_z -  (k_ * sz));
-          break;
-
-        case 4:
-
-          y = (j_ * sy);
-          z = (i_ * sx + sx);
-
-          x = ( sz * size_z - (k_ * sz));
-
-          break;
-
-        case 5:
-          y = (j_ * sy);
-          z = (i_ * sx + sx);
-          x = ( sz * size_z - (k_ * sz + sz));
-          break;
-
-        case 6:
-          y = (j_ * sy + sy);
-          z = (i_ * sx + sx);
-          x = ( sz * size_z - (k_ * sz + sz));
-          break;
-
-        case 7:
-          y = ( j_ * sy + sy);
-          z = ( i_ * sx + sx);
-          x = ( sz * size_z - (k_ * sz));
-          break;
-        }
-      }
+            {
+              switch (v[i])
+              {
+              case 0:
+                y = ( j_ * sy);
+                z = ( i_ * sx);
+                x = ( sz * size_z -  (k_ * sz));
+                break;
+              case 1:
+                y = (  j_ * sy);
+                z = (  i_ * sx);
+                x = ( sz * size_z -  (k_ * sz + sz*step_size)); // Corrigido
+                break;
+              case 2:
+                y = (  j_ * sy + sy*step_size); // Corrigido
+                z = (  i_ * sx);
+                x = ( sz * size_z -  (k_ * sz + sz*step_size)); // Corrigido
+                break;
+              case 3:
+                y = ( j_ * sy + sy*step_size); // Corrigido
+                z = ( i_ * sx);
+                x = ( sz * size_z -  (k_ * sz));
+                break;
+              case 4:
+                y = (j_ * sy);
+                z = (i_ * sx + sx*step_size); // Corrigido
+                x = ( sz * size_z - (k_ * sz));
+                break;
+              case 5:
+                y = (j_ * sy);
+                z = (i_ * sx + sx*step_size); // Corrigido
+                x = ( sz * size_z - (k_ * sz + sz*step_size)); // Corrigido
+                break;
+              case 6:
+                y = (j_ * sy + sy*step_size); // Corrigido
+                z = (i_ * sx + sx*step_size); // Corrigido
+                x = ( sz * size_z - (k_ * sz + sz*step_size)); // Corrigido
+                break;
+              case 7:
+                y = ( j_ * sy + sy*step_size); // Corrigido
+                z = ( i_ * sx + sx*step_size); // Corrigido
+                x = ( sz * size_z - (k_ * sz));
+                break;
+              }
+            }
       if (s[i] == 'i')
       {
 
@@ -2700,7 +2744,12 @@ void read_triangulation()
           break;
         }
 
-        t = -a / (b - a); //Aqui acha o ponto de interseçao sobre a aresta
+
+        if ((b - a) == 0.0f) {
+                t = 0.5f; // Ponto médio seguro caso os isovalores sejam idênticos
+            } else {
+                t = -a / (b - a);//Aqui acha o ponto de interseçao sobre a aresta
+            }
 
         switch (v[i])
         {
@@ -2875,7 +2924,6 @@ void read_triangulation()
 int topology(Octree* oct){
 	Octree * poct = nullptr;
 		poct = oct;
-  int interior_topology_;
 
   cube_sinal = 1;
 
@@ -2920,7 +2968,7 @@ int topology(Octree* oct){
     else
     {
 
-      interior_topology_ = LEAF;
+      interior_topology = LEAF;
       case_ = 0;
     }
   }
@@ -2930,7 +2978,7 @@ int topology(Octree* oct){
     if (cont_face_sinal == 1)
     {
 
-      interior_topology_ = LEAF;
+      interior_topology = LEAF;
       case_ = 6;
     }
     if (cont_face_sinal == 0)
@@ -2948,13 +2996,13 @@ int topology(Octree* oct){
     case_ = 7;
 
     if (cont_face_sinal == 0)
-      interior_topology_ = LEAF;
+      interior_topology = LEAF;
 
     if (cont_face_sinal == 1)
-      interior_topology_ = LEAF;
+      interior_topology = LEAF;
 
     if (cont_face_sinal == 2)
-      interior_topology_ = ADD_INT_P;
+      interior_topology = ADD_INT_P;
 
     if (cont_face_sinal == 3)
     {
@@ -2987,7 +3035,7 @@ int topology(Octree* oct){
 
     if (cont_face_sinal == 1)
     {
-      interior_topology_ = ADD_INT_P;
+      interior_topology = ADD_INT_P;
       add_interior_point = 1;
     }
     if (cont_face_sinal == 0)
@@ -3004,31 +3052,31 @@ int topology(Octree* oct){
   {
     case_ = 13;
     if (cont_face_sinal == 0)
-      interior_topology_ = LEAF;
+      interior_topology = LEAF;
     if (cont_face_sinal == 6)
     {
-      interior_topology_ = LEAF;
+      interior_topology = LEAF;
     }
 
     if (cont_face_sinal == 1)
-      interior_topology_ = LEAF;
+      interior_topology = LEAF;
     if (cont_face_sinal == 5)
     {
-      interior_topology_ = LEAF;
+      interior_topology = LEAF;
     }
 
     if (cont_face_sinal == 2)
-      interior_topology_ = ADD_INT_P;
+      interior_topology = ADD_INT_P;
     if (cont_face_sinal == 4)
     {
-      interior_topology_ = ADD_INT_P;
+      interior_topology = ADD_INT_P;
     }
 
     if (cont_face_sinal == 3)
     {
       if (real_n_groups == 1)
       {
-        interior_topology_ = ADD_INT_P;
+        interior_topology = ADD_INT_P;
       }
       else
       {
@@ -3039,12 +3087,12 @@ int topology(Octree* oct){
   }
   if(verification == 1)
   {
-    if(interior_topology_ == TUNNEL) return 0;
+    if(interior_topology == TUNNEL) return 0;
     else return 1;
   }
 
 
-  return interior_topology_;
+  return interior_topology;
 
 }
 
@@ -3086,6 +3134,8 @@ vector<AddPoints> triangulation(Octree* oct){
 	  case ADD_INT_P:
 	   return(one_inter_point_triangulation(oct));
 	    break;
+	  default:
+		  return std::vector<AddPoints>();
 	  }
 }
 //====================================================================================================
@@ -3243,15 +3293,20 @@ int run(char* file)
 
 	}*/
 
+	printf("Entrando Sinaliza Octree\n");
 	oct->sinaliza_octree(oct);
+	printf("Entrando Merge Octree\n");
 	oct->merge(oct);
+	printf("Entrando Mesh Octree\n");
 	oct->mesh(oct);
 
-	output_debug_file = "/home/dgti_xande/saidas_mc/files/fuel_OCT_iso_19-1_3.txt";
 	FILE* aux = fopen(output_debug_file,"w");
-
-	oct->visualiza_octree_F(oct,aux);
-
+	if(aux != nullptr){
+		oct->visualiza_octree_F(oct,aux);
+	    fclose(aux);
+	} else {
+		printf("\nAviso: Nao foi possivel criar o arquivo %s\n", output_debug_file);
+	}
 
 	// printf("done!\n");
 
@@ -3262,14 +3317,18 @@ int run(char* file)
 	delete[]n_group_edge;
 	//delete[] visited_cube;
 
+
+//	read_triangulation();
+	printf("Entrando Teste_read_triagulation\n");
+	teste_read_triangulation(oct);
+
+	printf("Entrando Write Mesh Octree\n");
+	write_mesh();
+
 	snap_mesh_element.clear();
 	snap_mesh_index.clear();
 	snap_mesh_cube.clear();
-
-//	read_triangulation();
-	teste_read_triangulation(oct);
-
-	write_mesh();
+	snap_mesh_step.clear();
 
 	_x.clear();
 	_y.clear();
@@ -3301,7 +3360,7 @@ int run(char* file)
 	printf("\nQuantidade de cubos: %d | Cubos vazios: %d", cubos_total_octree, vazios_total_octree);
 	printf("\nTaxa de descarte total (Incluindo padding): %.2f%% (%d/%d)\n", taxa_descarte_octree, vazios_total_octree, cubos_total_octree);
 
-
+	delete oct;
 	return 0;
 }
 //===================================================================================================
@@ -3386,7 +3445,8 @@ int main(int argc, char **argv)
   				nomeArquivo = "fuel";
   				char* filename = "/home/dgti_xande/entradas_mc/fuel.nhdr";
   				isovalue = 19.1;
-  				output_mesh_file = "/home/dgti_xande/saidas_mc/fuel_OCT_iso_19-1_3.off";
+  				output_mesh_file = "/home/dgti_xande/saidas_mc/fuel_OCT_iso_19-1_12.off";
+  				output_debug_file = "/home/dgti_xande/saidas_mc/files/fuel_OCT_iso_19-1_12.txt";
 
 
 
