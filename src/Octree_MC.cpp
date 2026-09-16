@@ -1,7 +1,13 @@
 #include "Octree_.h"
 #include <stdio.h>
+
 int cubos_vazios_total = 0;
 int cubos_total =0;
+int total_folhas_pos_merge = 0;
+int folhas_vazias_pos_merge = 0;
+int folhas_iso_pos_merge = 0;
+int total_nos_pos_merge = 0;
+bool debug = false;
 
 
 char* nomeArquivo;
@@ -52,9 +58,9 @@ void read_nhdr(char *filename)
 	}
 
 	/* say something about the array */
-	printf("read_nhdr: \"%s\" is a %d-dimensional nrrd of type %d (%s)\n",
+	if(debug)printf("read_nhdr: \"%s\" is a %d-dimensional nrrd of type %d (%s)\n",
 			filename, nin->dim, nin->type, airEnumStr(nrrdType, nin->type));
-	printf("read_nhdr: the array contains %d elements, each %d bytes in size\n",
+	if(debug)printf("read_nhdr: the array contains %d elements, each %d bytes in size\n",
 			(int) nrrdElementNumber(nin), (int) nrrdElementSize(nin));
 
 	size_x = nin->axis[0].size;
@@ -3198,7 +3204,7 @@ int run(char* file)
 	//	visited_cube[i] = -1;
 
 
-	printf("Octree_MC:: Draw triangulation...\n");
+	if(debug)printf("Octree_MC:: Draw triangulation...\n");
 	int max_dim = fmax(size_x, fmax(size_y, size_z));
 	int nivel_maximo = ceil(log2(max_dim));
 //	 Octree* oct = new Octree(0,0,0,maior_pot_2(size_x),maior_pot_2(size_y),maior_pot_2(size_z),nullptr,isovalue,0,pot_2(fmax(size_x,fmax(size_y,size_z))),0);
@@ -3293,11 +3299,12 @@ int run(char* file)
 
 	}*/
 
-	printf("Entrando Sinaliza Octree\n");
+	if(debug)printf("Entrando Sinaliza Octree\n");
 	oct->sinaliza_octree(oct);
-	printf("Entrando Merge Octree\n");
+	if(debug)printf("Entrando Merge Octree\n");
 	oct->merge(oct);
-	printf("Entrando Mesh Octree\n");
+	oct->metricas_octree_pos_merge(oct);
+	if(debug)printf("Entrando Mesh Octree\n");
 	oct->mesh(oct);
 
 	FILE* aux = fopen(output_debug_file,"w");
@@ -3310,7 +3317,7 @@ int run(char* file)
 
 	// printf("done!\n");
 
-	printf("\nOctree_MC:: Writing mesh...");
+	if(debug)printf("\nOctree_MC:: Writing mesh...");
 	delete[]e_group;
 	delete[] group_of_edges;
 	delete[]group_trigs;
@@ -3319,10 +3326,10 @@ int run(char* file)
 
 
 //	read_triangulation();
-	printf("Entrando Teste_read_triagulation\n");
+	if(debug)printf("Entrando Teste_read_triagulation\n");
 	teste_read_triangulation(oct);
 
-	printf("Entrando Write Mesh Octree\n");
+	if(debug)printf("Entrando Write Mesh Octree\n");
 	write_mesh();
 
 	snap_mesh_element.clear();
@@ -3334,19 +3341,18 @@ int run(char* file)
 	_y.clear();
 	_z.clear();
 
-	printf("done!\n");
+	if(debug)printf("done!\n");
 
 	// Calcula os totais de cubos
-	int cubos_total_octree = (real_size_x-1) * (real_size_y-1) * (real_size_z-1);
-	int cubos_total_dado = (size_x - 1) * (size_y - 1) * (size_z - 1);
+	int cubos_total_octree = (real_size_x) * (real_size_y) * (real_size_z);
+	int cubos_total_dado = (size_x ) * (size_y ) * (size_z );
 
 	int vazios_total_octree = cubos_vazios_total + (cubos_total_octree - cubos_total_dado);
 
 	// Cálculos das porcentagens de descarte/compressão
 	float taxa_descarte_dado = (cubos_vazios_total * 100.0) / cubos_total_dado;
-	float taxa_descarte_octree = (vazios_total_octree * 100.0) / cubos_total_octree;
-
-
+	float taxa_descarte_octree = (folhas_vazias_pos_merge * 100.0) / total_folhas_pos_merge;
+	float porcentagem_reducao = (total_folhas_pos_merge *100.0)/cubos_total_dado;
 
 	printf("\Octree=====================");
 	printf("[Dado:%s]",nomeArquivo);
@@ -3357,8 +3363,15 @@ int run(char* file)
 
 	printf("\n[Análise da Octree (Virtual)]");
 	printf("\nGrid Octree (Virtual): x%d y%d z%d", real_size_x, real_size_y, real_size_z);
-	printf("\nQuantidade de cubos: %d | Cubos vazios: %d", cubos_total_octree, vazios_total_octree);
-	printf("\nTaxa de descarte total (Incluindo padding): %.2f%% (%d/%d)\n", taxa_descarte_octree, vazios_total_octree, cubos_total_octree);
+	printf("\nQuantidade de folhas(equivalente ao cubos): %d", cubos_total_octree);
+
+	printf("\n\n[Analise Octree depois do Merge]");
+	printf("\nTotal de nos folha: %d | Folhas Vazias: %d", total_folhas_pos_merge, folhas_vazias_pos_merge);
+	printf("\nTaxa de descarte da Octree: %.2f%%", taxa_descarte_octree);
+
+	printf("\n\n[Comparacao MC | Octree]");
+	printf("\nTotal de cubos MC %d | Total nos folha Octree %d -> %.3f%% ", cubos_total_dado, total_folhas_pos_merge,porcentagem_reducao*100) ;
+	printf("\n==========================================\n");
 
 	delete oct;
 	return 0;
@@ -3445,8 +3458,8 @@ int main(int argc, char **argv)
   				nomeArquivo = "fuel";
   				char* filename = "/home/dgti_xande/entradas_mc/fuel.nhdr";
   				isovalue = 19.1;
-  				output_mesh_file = "/home/dgti_xande/saidas_mc/fuel_OCT_iso_19-1_12.off";
-  				output_debug_file = "/home/dgti_xande/saidas_mc/files/fuel_OCT_iso_19-1_12.txt";
+  				output_mesh_file = "/home/dgti_xande/saidas_mc/fuel_OCT_iso_19-1_15.off";
+  				output_debug_file = "/home/dgti_xande/saidas_mc/files/fuel_OCT_iso_19-1_15.txt";
 
 
 
@@ -3456,7 +3469,7 @@ int main(int argc, char **argv)
 //  				output_mesh_file = "/home/dgti_xande/saidas_mc/CT-Chest_OCT_iso_48-5.off";
 
 
-
+	debug = false;
     run(filename);
 	//fecha_arquivo(arquivo);
 	printf("Program ended..\n");
