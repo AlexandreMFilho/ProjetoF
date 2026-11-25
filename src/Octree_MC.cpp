@@ -3302,7 +3302,7 @@ int run(char* file)
 	if(debug)printf("Entrando Sinaliza Octree\n");
 	oct->sinaliza_octree(oct);
 	if(debug)printf("Entrando Merge Octree\n");
-	oct->merge(oct);
+//	oct->merge(oct);
 	oct->metricas_octree_pos_merge(oct);
 	if(debug)printf("Entrando Mesh Octree\n");
 	oct->mesh(oct);
@@ -3310,7 +3310,7 @@ int run(char* file)
 	FILE* aux = fopen(output_debug_file,"w");
 	if(aux != nullptr){
 		oct->visualiza_octree_F(oct,aux);
-	    fclose(aux);
+//	    fclose(aux);
 	} else {
 		printf("\nAviso: Nao foi possivel criar o arquivo %s\n", output_debug_file);
 	}
@@ -3345,8 +3345,8 @@ int run(char* file)
 
 	// Calcula os totais de cubos
 	int cubos_total_octree = (real_size_x) * (real_size_y) * (real_size_z);
-	int cubos_total_dado = (size_x ) * (size_y ) * (size_z );
-
+	int maior_dimensao =  maior_pot_2(fmax(size_x,fmax(size_y,size_z)));
+	int cubos_total_dado = maior_dimensao*maior_dimensao*maior_dimensao;
 	int vazios_total_octree = cubos_vazios_total + (cubos_total_octree - cubos_total_dado);
 
 	// Cálculos das porcentagens de descarte/compressão
@@ -3354,25 +3354,25 @@ int run(char* file)
 	float taxa_descarte_octree = (folhas_vazias_pos_merge * 100.0) / total_folhas_pos_merge;
 	float porcentagem_reducao = (total_folhas_pos_merge *100.0)/cubos_total_dado;
 
-	printf("\Octree=====================");
-	printf("[Dado:%s]",nomeArquivo);
-	printf("\n\n[Análise do Dado Real]");
-	printf("\nGrid Dado Real: x%d y%d z%d", size_x, size_y, size_z);
-	printf("\nQuantidade de cubos: %d | Cubos vazios: %d", cubos_total_dado, cubos_vazios_total);
-	printf("\nTaxa de descarte (Espaço vazio original): %.2f%% (%d/%d)\n", taxa_descarte_dado, cubos_vazios_total, cubos_total_dado);
+	fprintf(aux,"\n\n\Octree=====================");
+	fprintf(aux,"[Dado:%s]",nomeArquivo);
+	fprintf(aux,"\n\n[Análise do Dado Real]");
+	fprintf(aux,"\nGrid Dado Real: x%d y%d z%d", size_x, size_y, size_z);
+	fprintf(aux,"\nQuantidade de cubos: %d | Cubos vazios: %d", cubos_total_dado, cubos_vazios_total);
+	fprintf(aux,"\nTaxa de descarte (Espaço vazio original): %.2f%% (%d/%d)\n", taxa_descarte_dado, cubos_vazios_total, cubos_total_dado);
 
-	printf("\n[Análise da Octree (Virtual)]");
-	printf("\nGrid Octree (Virtual): x%d y%d z%d", real_size_x, real_size_y, real_size_z);
-	printf("\nQuantidade de folhas(equivalente ao cubos): %d", cubos_total_octree);
+	fprintf(aux,"\n[Análise da Octree (Virtual)]");
+	fprintf(aux,"\nGrid Octree (Virtual): x%d y%d z%d", real_size_x, real_size_y, real_size_z);
+	fprintf(aux,"\nQuantidade de folhas(equivalente ao cubos): %d", cubos_total_octree);
 
-	printf("\n\n[Analise Octree depois do Merge]");
-	printf("\nTotal de nos folha: %d | Folhas Vazias: %d", total_folhas_pos_merge, folhas_vazias_pos_merge);
-	printf("\nTaxa de descarte da Octree: %.2f%%", taxa_descarte_octree);
+	fprintf(aux,"\n\n[Analise Octree depois do Merge]");
+	fprintf(aux,"\nTotal de nos folha: %d | Folhas Vazias: %d", total_folhas_pos_merge, folhas_vazias_pos_merge);
+	fprintf(aux,"\nTaxa de descarte da Octree: %.2f%%", taxa_descarte_octree);
 
-	printf("\n\n[Comparacao MC | Octree]");
-	printf("\nTotal de cubos MC %d | Total nos folha Octree %d -> %.3f%% ", cubos_total_dado, total_folhas_pos_merge,porcentagem_reducao*100) ;
-	printf("\n==========================================\n");
-
+	fprintf(aux,"\n\n[Comparacao MC | Octree]");
+	fprintf(aux,"\nTotal de cubos MC %d | Total nos folha Octree %d -> %.3f%% ", cubos_total_dado, total_folhas_pos_merge,porcentagem_reducao*100) ;
+	fprintf(aux,"\n==========================================\n");
+	fclose(aux);
 	delete oct;
 	return 0;
 }
@@ -3453,14 +3453,27 @@ int main(int argc, char **argv)
 //  				nomeArquivo = "aneurism";
 //  				char* filename = "/home/dgti_xande/entradas_mc/aneurism.nhdr";
 //  				isovalue = 100.1;
-//  				output_mesh_file = "/home/dgti_xande/saidas_mc/aneurism_OCT_iso_100-1.off";
+//  				output_mesh_file = "/home/dgti_xande/saidas_mc/aneurism_OCT_iso_100-1_2.off";
+//  				output_debug_file = "/home/dgti_xande/saidas_mc/aneurism_OCT_iso_100-1_2.txt";
 
-  				nomeArquivo = "fuel";
-  				char* filename = "/home/dgti_xande/entradas_mc/fuel.nhdr";
-  				isovalue = 19.1;
-  				output_mesh_file = "/home/dgti_xande/saidas_mc/fuel_OCT_iso_19-1_15.off";
-  				output_debug_file = "/home/dgti_xande/saidas_mc/files/fuel_OCT_iso_19-1_15.txt";
+//  				nomeArquivo = "fuel";
+//  				char* filename = "/home/dgti_xande/entradas_mc/fuel.nhdr";
+//  				isovalue = 19.1;
+//  				output_mesh_file = "/home/dgti_xande/saidas_mc/fuel_OCT_iso_19-1_21.off";
+//  				output_debug_file = "/home/dgti_xande/saidas_mc/files/fuel_OCT_iso_19-1_21.txt";
 
+//				nomeArquivo = "mri_woman_256x256x109_uint16";
+//  				char* filename = "/home/dgti_xande/entradas_mc/mri_woman_256x256x109_uint16.nhdr";
+//  				isovalue = 15.5;//615.5
+//  				output_mesh_file = "/home/dgti_xande/saidas_mc/mri_woman_256x256x109_uint16_iso_615-5_1.off";
+//  				output_debug_file = "/home/dgti_xande/saidas_mc/files/mri_woman_256x256x109_uint16_OCT_iso_615-5_1.txt";
+
+
+				nomeArquivo = "tooth_103x94x161_uint8";
+  				char* filename = "/home/dgti_xande/entradas_mc/tooth_103x94x161_uint8.nhdr";
+  				isovalue = 127.5;
+  				output_mesh_file = "/home/dgti_xande/saidas_mc/tooth_103x94x161_uint8_iso_127-5_4.off";
+  				output_debug_file = "/home/dgti_xande/saidas_mc/files/tooth_103x94x161_uint8_OCT_iso_127-5_4.txt";
 
 
 //  				nomeArquivo = "CT-Chest";
